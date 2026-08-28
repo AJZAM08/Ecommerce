@@ -1,4 +1,11 @@
 package com.ecommerce.domain.entity
 
-class OrderItem {
-}
+data class OrderItem(
+    val id: Long,
+    val orderId: Long,
+    val productId: Long,
+    val productName: String,
+    val variantSize: String,
+    val price: Long,
+    val quantity: Int
+)
