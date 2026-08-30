@@ -9,11 +9,13 @@ import com.ecommerce.data.fake.FakeProductDataSource
 import com.ecommerce.data.local.dao.CartDao
 import com.ecommerce.data.local.dao.OrderDao
 import com.ecommerce.data.local.dao.ProductDao
+import com.ecommerce.data.local.dao.UserDao
 import com.ecommerce.data.local.entity.CartItemEntity
 import com.ecommerce.data.local.entity.OrderEntity
 import com.ecommerce.data.local.entity.OrderItemEntity
 import com.ecommerce.data.local.entity.ProductEntity
 import com.ecommerce.data.local.entity.ProductVariantEntity
+import com.ecommerce.data.local.entity.UserEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,15 +26,17 @@ import kotlinx.coroutines.launch
         ProductVariantEntity::class,
         CartItemEntity::class,
         OrderEntity::class,
-        OrderItemEntity::class
+        OrderItemEntity::class,
+        UserEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun cartDao(): CartDao
     abstract fun orderDao(): OrderDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
@@ -60,12 +64,12 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onCreate(db)
                 INSTANCE?.let { database ->
                     scope.launch(Dispatchers.IO) {
-                        prePopulateDatabase(database.productDao())
+                        prePopulateDatabase(database.productDao(), database.userDao())
                     }
                 }
             }
 
-            private suspend fun prePopulateDatabase(productDao: ProductDao) {
+            private suspend fun prePopulateDatabase(productDao: ProductDao, userDao: UserDao) {
                 if (productDao.getProductCount() == 0) {
                     val dummyProducts = FakeProductDataSource.dummyProduct
                     for (p in dummyProducts) {
@@ -91,6 +95,34 @@ abstract class AppDatabase : RoomDatabase() {
                         }
                         productDao.insertVariants(variantEntities)
                     }
+                }
+
+                if (userDao.getUserCount() == 0) {
+                    userDao.insertUser(
+                        UserEntity(
+                            id = 1L,
+                            name = "Admin Toko Atsiri",
+                            email = "admin@katalogminyak.com",
+                            passwordHash = "admin123",
+                            phone = "081299998888",
+                            address = "Kantor Pusat Gudang Minyak Atsiri, Ambon",
+                            role = "ADMIN",
+                            isCurrentSession = false
+                        )
+                    )
+
+                    userDao.insertUser(
+                        UserEntity(
+                            id = 2L,
+                            name = "Ahmad Fulan",
+                            email = "customer@email.com",
+                            passwordHash = "customer123",
+                            phone = "081234567890",
+                            address = "Jl. Rempah Herbal No. 12, Jakarta Utara",
+                            role = "CUSTOMER",
+                            isCurrentSession = false
+                        )
+                    )
                 }
             }
         }
