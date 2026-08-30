@@ -5,5 +5,6 @@ data class User(
     val name: String,
     val email: String,
     val phone: String,
-    val defaultAddress: String
+    val defaultAddress: String,
+    val role: UserRole = UserRole.CUSTOMER
 )

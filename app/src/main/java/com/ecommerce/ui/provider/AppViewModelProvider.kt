@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ecommerce.EcommerceApplication
 import com.ecommerce.ui.account.AccountViewModel
+import com.ecommerce.ui.auth.AuthViewModel
 import com.ecommerce.ui.cart.CartViewModel
 import com.ecommerce.ui.checkout.CheckoutViewModel
 import com.ecommerce.ui.detail.DetailProductViewModel
@@ -52,6 +53,11 @@ object AppViewModelProvider {
         }
         initializer {
             AccountViewModel()
+        }
+        initializer {
+            AuthViewModel(
+                authRepository = ecommerceApplication().container.authRepository
+            )
         }
     }
 }

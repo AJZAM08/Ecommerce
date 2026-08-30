@@ -23,6 +23,8 @@ sealed class Screen(val route: String) {
         fun createRoute(orderId: Long) = "order_detail/$orderId"
     }
     object Account : Screen("account")
+    object Login : Screen("login")
+    object Register : Screen("register")
 }
 
 enum class BottomNavItem(

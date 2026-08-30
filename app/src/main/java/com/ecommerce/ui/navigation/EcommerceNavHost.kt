@@ -10,6 +10,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.ecommerce.ui.account.AccountScreen
 import com.ecommerce.ui.account.AccountViewModel
+import com.ecommerce.ui.auth.AuthViewModel
+import com.ecommerce.ui.auth.LoginScreen
+import com.ecommerce.ui.auth.RegisterScreen
 import com.ecommerce.ui.cart.CartScreen
 import com.ecommerce.ui.cart.CartViewModel
 import com.ecommerce.ui.checkout.CheckoutScreen
@@ -111,6 +114,35 @@ fun EcommerceNavHost(
                 viewModel = accountViewModel,
                 onNavigateToOrders = {
                     navController.navigate(Screen.Orders.route)
+                }
+            )
+        }
+
+        composable(Screen.Login.route) {
+            val authViewModel: AuthViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            LoginScreen(
+                viewModel = authViewModel,
+                onLoginSuccess = {
+                    navController.popBackStack()
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                },
+                onContinueAsGuest = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.Register.route) {
+            val authViewModel: AuthViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            RegisterScreen(
+                viewModel = authViewModel,
+                onRegisterSuccess = {
+                    navController.popBackStack(Screen.Login.route, inclusive = true)
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

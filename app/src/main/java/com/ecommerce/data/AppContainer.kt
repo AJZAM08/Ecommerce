@@ -2,9 +2,11 @@ package com.ecommerce.data
 
 import android.content.Context
 import com.ecommerce.data.local.AppDatabase
+import com.ecommerce.data.repository.RoomAuthRepositoryImpl
 import com.ecommerce.data.repository.RoomCartRepositoryImpl
 import com.ecommerce.data.repository.RoomOrderRepositoryImpl
 import com.ecommerce.data.repository.RoomProductRepositoryImpl
+import com.ecommerce.domain.repository.AuthRepository
 import com.ecommerce.domain.repository.CartRepository
 import com.ecommerce.domain.repository.OrderRepository
 import com.ecommerce.domain.repository.ProductRepository
@@ -16,6 +18,7 @@ interface AppContainer {
     val productRepository: ProductRepository
     val cartRepository: CartRepository
     val orderRepository: OrderRepository
+    val authRepository: AuthRepository
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
@@ -31,5 +34,8 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     }
     override val orderRepository: OrderRepository by lazy {
         RoomOrderRepositoryImpl(database.orderDao())
+    }
+    override val authRepository: AuthRepository by lazy {
+        RoomAuthRepositoryImpl(database.userDao())
     }
 }
