@@ -35,4 +35,10 @@ interface ProductDao {
 
     @Query("SELECT COUNT(*) FROM products")
     suspend fun getProductCount(): Int
+
+    @Query("UPDATE product_variants SET stock = :newStock WHERE id = :variantId")
+    suspend fun updateVariantStock(variantId: Long, newStock: Int)
+
+    @Query("DELETE FROM products WHERE id = :productId")
+    suspend fun deleteProduct(productId: Long)
 }

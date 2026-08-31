@@ -19,10 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Shield
@@ -57,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ecommerce.domain.entity.User
+import com.ecommerce.domain.entity.UserRole
 import com.ecommerce.ui.theme.PrimaryGreen
 import com.ecommerce.ui.theme.SecondaryBrown
 
@@ -65,26 +68,15 @@ import com.ecommerce.ui.theme.SecondaryBrown
 fun AccountScreen(
     viewModel: AccountViewModel,
     onNavigateToOrders: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToAdmin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val currentUser by viewModel.currentUser.collectAsState()
     val state by viewModel.uiState.collectAsState()
-
-    // Dialog Edit Profil
-    if (state.isEditDialogOpen) {
-        EditProfileDialog(
-            currentUser = state.user,
-            onDismiss = { viewModel.showEditDialog(false) },
-            onSave = { name, email, phone, address ->
-                viewModel.updateUserProfile(name, email, phone, address)
-            }
-        )
-    }
-
-    // Dialog Tentang Aplikasi
     if (state.isAboutDialogOpen) {
         AboutAppDialog(onDismiss = { viewModel.showAboutDialog(false) })
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -100,116 +92,124 @@ fun AccountScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // 1. Header Profil Pengguna
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(2.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            // 1. Header Profil / Login Prompt
+            if (currentUser == null) {
+                // Tampilan jika belum login (Guest)
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Avatar Icon
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(PrimaryGreen.copy(alpha = 0.15f), shape = CircleShape),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = null,
-                            tint = PrimaryGreen,
-                            modifier = Modifier.size(36.dp)
+                            tint = Color.Gray,
+                            modifier = Modifier.size(48.dp)
                         )
-                    }
-
-                    Spacer(modifier = Modifier.width(14.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = state.user.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = state.user.email,
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = state.user.phone,
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = SecondaryBrown.copy(alpha = 0.12f)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Anda Masuk sebagai Tamu", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Masuk atau daftar untuk menyimpan riwayat pesanan dan alamat Anda.", fontSize = 12.sp, color = Color.Gray, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onNavigateToLogin,
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = "🌿 Pelanggan Herbal",
-                                fontSize = 11.sp,
-                                color = SecondaryBrown,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
+                            Text("Masuk / Daftar Akun")
                         }
                     }
-
-                    OutlinedButton(
-                        onClick = { viewModel.showEditDialog(true) },
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                }
+            } else {
+                // Tampilan jika sudah login
+                val user = currentUser!!
+                val isAdmin = user.role == UserRole.ADMIN
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Edit", fontSize = 12.sp)
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(if (isAdmin) SecondaryBrown.copy(alpha = 0.15f) else PrimaryGreen.copy(alpha = 0.15f), shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isAdmin) Icons.Default.AdminPanelSettings else Icons.Default.Person,
+                                contentDescription = null,
+                                tint = if (isAdmin) SecondaryBrown else PrimaryGreen,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(user.name, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text(user.email, fontSize = 12.sp, color = Color.Gray)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = if (isAdmin) SecondaryBrown.copy(alpha = 0.15f) else PrimaryGreen.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = if (isAdmin) "👑 Administrator Toko" else "🌿 Pelanggan Herbal",
+                                    fontSize = 11.sp,
+                                    color = if (isAdmin) SecondaryBrown else PrimaryGreen,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 2. Alamat Tersimpan
-            Text("📍 Alamat Pengiriman Utama", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = state.user.defaultAddress,
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
+                // Alamat Tersimpan
+                Text("📍 Alamat Pengiriman", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(6.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(user.defaultAddress, fontSize = 13.sp, modifier = Modifier.padding(14.dp))
                 }
             }
-
             Spacer(modifier = Modifier.height(20.dp))
-
-            // 3. Menu Navigasi
-            Text("⚙️ Menu & Pengaturan", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            // 2. Menu Navigasi
+            Text("⚙️ Menu & Layanan", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(6.dp))
-
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
+                    // Menu Khusus Admin jika login sebagai ADMIN
+                    if (currentUser?.role == UserRole.ADMIN) {
+                        AccountMenuItem(
+                            icon = Icons.Default.AdminPanelSettings,
+                            title = "Panel Admin Toko",
+                            subtitle = "Kelola produk, stok & update status pesanan",
+                            onClick = onNavigateToAdmin
+                        )
+                        HorizontalDivider(color = Color(0xFFF2F2F2))
+                    }
                     AccountMenuItem(
                         icon = Icons.Default.ReceiptLong,
                         title = "Pesanan Saya",
-                        subtitle = "Lihat status & riwayat belanja Anda",
+                        subtitle = "Lihat status & riwayat transaksi",
                         onClick = onNavigateToOrders
                     )
                     HorizontalDivider(color = Color(0xFFF2F2F2))
@@ -222,20 +222,26 @@ fun AccountScreen(
                     HorizontalDivider(color = Color(0xFFF2F2F2))
                     AccountMenuItem(
                         icon = Icons.Default.Chat,
-                        title = "Bantuan & Layanan Pelanggan",
-                        subtitle = "Hubungi WhatsApp admin toko",
+                        title = "Bantuan & CS WhatsApp",
+                        subtitle = "Hubungi admin toko",
                         onClick = { viewModel.showAboutDialog(true) }
-                    )
-                    HorizontalDivider(color = Color(0xFFF2F2F2))
-                    AccountMenuItem(
-                        icon = Icons.Default.Shield,
-                        title = "Kebijakan Privasi",
-                        subtitle = "Keamanan data & transaksi belanja",
-                        onClick = {}
                     )
                 }
             }
-
+            // Tombol Logout jika sedang login
+            if (currentUser != null) {
+                Spacer(modifier = Modifier.height(24.dp))
+                OutlinedButton(
+                    onClick = { viewModel.logout() },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Keluar dari Akun")
+                }
+            }
             Spacer(modifier = Modifier.height(32.dp))
         }
     }

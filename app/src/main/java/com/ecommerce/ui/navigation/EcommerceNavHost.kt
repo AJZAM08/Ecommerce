@@ -10,6 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.ecommerce.ui.account.AccountScreen
 import com.ecommerce.ui.account.AccountViewModel
+import com.ecommerce.ui.admin.AdminDashboardScreen
+import com.ecommerce.ui.admin.AdminViewModel
 import com.ecommerce.ui.auth.AuthViewModel
 import com.ecommerce.ui.auth.LoginScreen
 import com.ecommerce.ui.auth.RegisterScreen
@@ -112,9 +114,9 @@ fun EcommerceNavHost(
             val accountViewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory)
             AccountScreen(
                 viewModel = accountViewModel,
-                onNavigateToOrders = {
-                    navController.navigate(Screen.Orders.route)
-                }
+                onNavigateToOrders = { navController.navigate(Screen.Orders.route) },
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                onNavigateToAdmin = { navController.navigate(Screen.AdminDashboard.route) }
             )
         }
 
@@ -144,6 +146,14 @@ fun EcommerceNavHost(
                 onNavigateBack = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(Screen.AdminDashboard.route) {
+            val adminViewModel: AdminViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            AdminDashboardScreen(
+                viewModel = adminViewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }
