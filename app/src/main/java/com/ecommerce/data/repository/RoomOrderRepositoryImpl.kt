@@ -69,4 +69,7 @@ class RoomOrderRepositoryImpl(
 
         return Result.success(createdOrder)
     }
+    override suspend fun updateOrderStatus(orderId: Long, newStatus: OrderStatus) {
+        orderDao.updateOrderStatus(orderId, newStatus.name)
+    }
 }

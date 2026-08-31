@@ -2,6 +2,7 @@ package com.ecommerce.domain.repository
 
 import com.ecommerce.domain.entity.CartItem
 import com.ecommerce.domain.entity.Order
+import com.ecommerce.domain.entity.OrderStatus
 import kotlinx.coroutines.flow.Flow
 
 interface OrderRepository {
@@ -14,4 +15,5 @@ interface OrderRepository {
         shippingCost: Long,
         items: List<CartItem>
     ): Result<Order>
+    suspend fun updateOrderStatus(orderId: Long, newStatus: OrderStatus)
 }

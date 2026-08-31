@@ -25,4 +25,7 @@ interface OrderDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrderItems(items: List<OrderItemEntity>)
+
+    @Query("UPDATE orders SET status = :status WHERE id = :orderId")
+    suspend fun updateOrderStatus(orderId: Long, status: String)
 }
