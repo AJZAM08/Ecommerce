@@ -23,6 +23,7 @@ import com.ecommerce.ui.detail.DetailProductViewModel
 import com.ecommerce.ui.detail.DetailProdukScreen
 import com.ecommerce.ui.katalog.KatalogScreen
 import com.ecommerce.ui.katalog.KatalogViewModel
+import com.ecommerce.ui.onboarding.OnboardingScreen
 import com.ecommerce.ui.orders.OrdersScreen
 import com.ecommerce.ui.orders.OrdersViewModel
 import com.ecommerce.ui.orders.detail.OrderDetailScreen
@@ -154,6 +155,16 @@ fun EcommerceNavHost(
             AdminDashboardScreen(
                 viewModel = adminViewModel,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onFinished = {
+                    navController.navigate(Screen.Katalog.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
             )
         }
     }
