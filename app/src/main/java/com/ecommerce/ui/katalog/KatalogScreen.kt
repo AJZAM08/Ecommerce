@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ecommerce.domain.entity.ProductCategory
+import com.ecommerce.ui.components.shimmer.ProductCardShimmer
 import com.ecommerce.ui.katalog.components.ProductCard
 import com.ecommerce.ui.theme.PrimaryGreen
 
@@ -109,8 +110,16 @@ fun KatalogScreen(
 
         when (val state = uiState) {
             is KatalogUiState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryGreen)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(6) {
+                        ProductCardShimmer()
+                    }
                 }
             }
 

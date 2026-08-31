@@ -26,6 +26,7 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
     object AdminDashboard : Screen("admin_dashboard")
+    object Onboarding : Screen("onboarding")
 }
 
 enum class BottomNavItem(
